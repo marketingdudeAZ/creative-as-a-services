@@ -1,0 +1,9 @@
+requests
+python-dotenv
+anthropic
+google-api-python-client
+google-auth
+beautifulsoup4
+pdfplumber
+jinja2
+flask

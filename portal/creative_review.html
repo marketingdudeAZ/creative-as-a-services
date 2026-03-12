@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Review — RPM Living</title>
+  <link rel="stylesheet" href="portal.css">
+  <!--
+    HubSpot CMS Integration Notes:
+    - This template renders at: digital.rpmliving.com/creative-review/{UUID}/{YYYYMM}
+    - In HubSpot CMS, replace static CSS/JS paths with {{ get_asset_url() }} calls
+    - Set window.PORTAL_API_BASE to the webhook server URL
+    - HMAC token is passed as ?token= query parameter
+  -->
+  <style>
+    /* Inline Inter font for portability */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  </style>
+</head>
+<body>
+  <div class="portal-container" id="portal-root">
+
+    <!-- Header -->
+    <div class="portal-header">
+      <p class="meta">RPM Living Digital Products &amp; Services</p>
+      <h1 id="property-name">Loading...</h1>
+      <p class="meta"><span id="package-tier"></span> Package</p>
+      <span class="status-badge status-pending" id="status-badge">Loading</span>
+    </div>
+
+    <!-- Section 1: Creative Rationale -->
+    <div class="portal-section">
+      <h2>Why This Creative</h2>
+      <p class="rationale-text" id="rationale-text"></p>
+      <div class="rationale-tags" id="rationale-tags">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Section 2: Video Gallery -->
+    <div class="portal-section">
+      <h2>Your Video Creative</h2>
+      <div class="video-grid" id="video-gallery">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Section 3: Budget Simulator (Starter/Standard only) -->
+    <div class="portal-section" id="simulator-section" style="display:none;">
+      <h2>What More Investment Could Deliver</h2>
+      <p style="color:var(--rpm-gray-600);font-size:14px;margin-bottom:16px;">
+        Based on your property's actual performance data, here's what upgrading could look like.
+      </p>
+      <table class="simulator-table" id="simulator-table">
+        <!-- Populated by JS -->
+      </table>
+      <div class="simulator-cta">
+        <button class="btn btn-amber" onclick="submitUpsell(document.getElementById('package-tier').textContent === 'Starter' ? 'Standard' : 'Premium')">
+          Talk to my AM about upgrading
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback History -->
+    <div class="portal-section" id="feedback-history-section" style="display:none;">
+      <h2>Revision History</h2>
+      <div id="feedback-history">
+        <!-- Populated by JS if feedback exists -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Set the API base URL to your webhook server
+    window.PORTAL_API_BASE = "";  // e.g., "https://your-server.com" or "" for same-origin
+  </script>
+  <script src="portal.js"></script>
+</body>
+</html>

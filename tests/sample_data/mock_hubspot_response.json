@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "id": "12345",
+      "properties": {
+        "name": "The Modern at Art Place",
+        "domain": "themodernartplace.com",
+        "website": "https://themodernartplace.com",
+        "sfid": "SF001",
+        "uuid": "abc-123-def",
+        "ninjacat_system_id": "NC001",
+        "rpmmarket": "Dallas",
+        "property_tone_and_voice": "Modern, upscale, vibrant",
+        "property_taglines": "Live Artfully. Your Canvas Awaits.",
+        "units_offered": "Studio, 1BR, 2BR",
+        "neighborhoods_to_target": "Deep Ellum, Uptown",
+        "landmarks_near_property": "AT&T Discovery District, Klyde Warren Park",
+        "unique_solutions": "Smart-home enabled community",
+        "amenities_to_call_out": "Resort-style pool, coworking spaces, rooftop lounge",
+        "selling_points_vs_competitors": "Dedicated coworking, newest build",
+        "community_adjectives": "Vibrant, connected, design-forward",
+        "overarching_goals": "95% occupancy by Q3",
+        "challenges_next_6_8_months": "New comp opening nearby in June",
+        "competitors_outside_aptiq": "The Hamilton, AMLI Design District",
+        "video_creative_package_tier": "Starter",
+        "video_creative_enrollment": "Active",
+        "video_creative_client_email": "client@example.com",
+        "video_creative_approval_status": null,
+        "video_creative_latest_urls": null,
+        "video_creative_revision_count": "0",
+        "video_creative_rationale": null,
+        "video_creative_scripts_json": null,
+        "video_creative_performance_snapshot": null,
+        "hs_object_id": "12345"
+      }
+    }
+  ],
+  "paging": {}
+}
