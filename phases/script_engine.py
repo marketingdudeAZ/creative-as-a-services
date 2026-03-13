@@ -4,6 +4,9 @@ Assembles creative brief from all data sources.
 Sends to Claude for script generation + strategic rationale.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 from datetime import datetime

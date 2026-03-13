@@ -4,6 +4,9 @@ Submits scripts to Creatify URL-to-Video workflow.
 Polls for completion. Returns video URLs.
 """
 
+from __future__ import annotations
+
+
 import logging
 import time
 import requests

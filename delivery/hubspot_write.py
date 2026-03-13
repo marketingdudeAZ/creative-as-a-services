@@ -1,10 +1,13 @@
 """HubSpot Write-Back — updates company records with video URLs, scripts, rationale."""
 
+from __future__ import annotations
+
+
 import json
 import logging
 import requests
 
-from config import HUBSPOT_API_KEY, HUBSPOT_API_BASE
+from config import HUBSPOT_API_KEY, HUBSPOT_API_BASE, normalize_property_data
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +144,7 @@ def get_company(hs_object_id: str) -> dict | None:
         data = resp.json()
         props = data.get("properties", {})
         props["hs_object_id"] = data.get("id", props.get("hs_object_id"))
+        normalize_property_data(props)
         return props
     except requests.RequestException as e:
         logger.error("Failed to fetch company %s: %s", hs_object_id, e)
@@ -172,6 +176,7 @@ def find_company_by_uuid(uuid: str) -> dict | None:
         if results:
             props = results[0].get("properties", {})
             props["hs_object_id"] = results[0].get("id", props.get("hs_object_id"))
+            normalize_property_data(props)
             return props
     except requests.RequestException as e:
         logger.error("Failed to search company by UUID %s: %s", uuid, e)

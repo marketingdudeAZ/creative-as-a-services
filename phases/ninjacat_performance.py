@@ -5,6 +5,9 @@ Connects to Gmail, searches for most recent NinjaCat report by SFID.
 Extracts PDF/CSV attachment, parses performance metrics.
 """
 
+from __future__ import annotations
+
+
 import csv
 import email
 import imaplib

@@ -1,5 +1,8 @@
 """Notification Email — sends review portal links and revision notifications via SMTP."""
 
+from __future__ import annotations
+
+
 import hashlib
 import hmac
 import logging

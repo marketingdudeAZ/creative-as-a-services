@@ -4,6 +4,9 @@ Fetches fresh competitive market CSV from Apt IQ.
 Filters to property's RPM Market. No caching.
 """
 
+from __future__ import annotations
+
+
 import csv
 import io
 import logging

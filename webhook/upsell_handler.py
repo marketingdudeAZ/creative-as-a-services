@@ -1,5 +1,8 @@
 """Upsell Handler — sends upgrade interest notification to AM."""
 
+from __future__ import annotations
+
+
 import logging
 
 from delivery.notification_email import send_upsell_am_notification

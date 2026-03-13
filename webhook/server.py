@@ -1,5 +1,8 @@
 """Webhook Server — Flask app handling approval, revision, and upsell endpoints."""
 
+from __future__ import annotations
+
+
 import logging
 import os
 import sys

@@ -4,6 +4,9 @@ Tier gating: Premium only.
 Fetches property website amenity pages, parses for amenity lists and lifestyle copy.
 """
 
+from __future__ import annotations
+
+
 import logging
 import requests
 from bs4 import BeautifulSoup

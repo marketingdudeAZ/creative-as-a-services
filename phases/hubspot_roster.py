@@ -4,9 +4,12 @@ Fetches all company records via Companies v3 API with getAll pagination.
 Filters to video_creative_enrollment = Active.
 """
 
+from __future__ import annotations
+
+
 import logging
 import requests
-from config import HUBSPOT_API_KEY, HUBSPOT_API_BASE, HUBSPOT_PROPERTIES
+from config import HUBSPOT_API_KEY, HUBSPOT_API_BASE, HUBSPOT_PROPERTIES, normalize_property_data
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +39,7 @@ def fetch_all_companies() -> list[dict]:
         for company in results:
             props = company.get("properties", {})
             props["hs_object_id"] = company.get("id", props.get("hs_object_id"))
+            normalize_property_data(props)
             all_companies.append(props)
 
         paging = data.get("paging", {})

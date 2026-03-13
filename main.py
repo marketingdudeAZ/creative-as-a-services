@@ -12,6 +12,9 @@ Usage:
     python main.py --property {SFID}      # Full pipeline for one property
 """
 
+from __future__ import annotations
+
+
 import argparse
 import json
 import logging
