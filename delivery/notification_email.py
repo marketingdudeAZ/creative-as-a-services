@@ -11,14 +11,17 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from pathlib import Path
+
 from jinja2 import Environment, FileSystemLoader
 
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, PORTAL_BASE_URL, WEBHOOK_SECRET
 
 logger = logging.getLogger(__name__)
 
-# Jinja2 template environment
-template_env = Environment(loader=FileSystemLoader("templates"))
+# Jinja2 template environment — resolve relative to this file
+_TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
+template_env = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)))
 
 
 def generate_hmac_token(uuid: str, month: str) -> str:

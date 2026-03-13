@@ -258,6 +258,10 @@ def generate_single_video(
 
 def run(property_data: dict, scripts: list[dict]) -> list[dict]:
     """Execute Phase 6: generate all video variants for a property."""
+    if not CREATIFY_API_KEY or CREATIFY_API_KEY.startswith("your_"):
+        logger.warning("Creatify API not configured — skipping video generation for %s", property_data.get("name"))
+        return []
+
     website_url = property_data.get("website") or property_data.get("domain") or ""
     results = []
 
