@@ -1,0 +1,385 @@
+<!--
+  RPM Living — Video Creative Review Portal
+  HubSpot CMS Template (HubL)
+
+  URL: digital.rpmliving.com/creative-review/{UUID}/{YYYYMM}
+
+  Setup Instructions:
+  1. In HubSpot: Marketing → Files and Templates → Design Tools
+  2. Create new template → "Coded file" → HTML + HubL
+  3. Paste this template
+  4. Upload portal.css and portal.js as coded files
+  5. Create a page using this template
+  6. Set the page URL path to: creative-review/
+  7. The UUID and YYYYMM are extracted from the URL path via JS
+
+  The page pulls all data from the webhook API server.
+  Set PORTAL_API_BASE below to your webhook server URL.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Review — RPM Living</title>
+
+  {{ standard_header_includes }}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- RPM Living Portal Styles (inline for HubSpot CMS) --- */
+    :root {
+      --rpm-dark: #1a1a2e;
+      --rpm-blue: #2563eb;
+      --rpm-green: #059669;
+      --rpm-amber: #d97706;
+      --rpm-red: #dc2626;
+      --rpm-gray-50: #f8f8fa;
+      --rpm-gray-100: #f1f1f4;
+      --rpm-gray-200: #e2e2e8;
+      --rpm-gray-400: #9ca3af;
+      --rpm-gray-600: #4b5563;
+      --rpm-gray-800: #1f2937;
+      --rpm-radius: 8px;
+      --rpm-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--rpm-gray-50); color: var(--rpm-gray-800); line-height: 1.6; }
+    .portal-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+    .portal-header { background: var(--rpm-dark); color: #fff; padding: 32px 40px; border-radius: var(--rpm-radius) var(--rpm-radius) 0 0; }
+    .portal-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .portal-header .meta { color: #8888aa; font-size: 14px; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 12px; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-partial { background: #dbeafe; color: #1e40af; }
+    .status-revision { background: #fce7f3; color: #9d174d; }
+    .portal-section { background: #fff; padding: 32px 40px; border-bottom: 1px solid var(--rpm-gray-200); }
+    .portal-section:last-child { border-bottom: none; border-radius: 0 0 var(--rpm-radius) var(--rpm-radius); }
+    .portal-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--rpm-dark); }
+    .rationale-text { font-size: 15px; line-height: 1.7; color: var(--rpm-gray-600); margin-bottom: 16px; }
+    .video-grid { display: flex; flex-direction: column; gap: 24px; }
+    .video-card { border: 1px solid var(--rpm-gray-200); border-radius: var(--rpm-radius); overflow: hidden; box-shadow: var(--rpm-shadow); }
+    .video-card-content { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .video-player { background: #000; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; }
+    .video-player video { width: 100%; height: 100%; object-fit: contain; }
+    .video-meta-badge { display: inline-flex; gap: 6px; padding: 8px 16px; background: var(--rpm-gray-50); border-bottom: 1px solid var(--rpm-gray-200); }
+    .video-meta-badge span { background: var(--rpm-gray-100); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: var(--rpm-gray-600); }
+    .script-panel { padding: 16px; }
+    .script-section { margin-bottom: 12px; }
+    .script-section label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rpm-gray-400); margin-bottom: 4px; }
+    .script-section p { font-size: 14px; color: var(--rpm-gray-800); }
+    .video-actions { display: flex; gap: 12px; padding: 16px; border-top: 1px solid var(--rpm-gray-200); }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-approve { background: var(--rpm-green); color: #fff; }
+    .btn-edit { background: var(--rpm-gray-100); color: var(--rpm-gray-800); }
+    .btn-primary { background: var(--rpm-blue); color: #fff; }
+    .btn-amber { background: var(--rpm-amber); color: #fff; }
+    .btn-approve-all { background: var(--rpm-green); color: #fff; width: 100%; padding: 14px; font-size: 16px; }
+    .btn-disabled { background: var(--rpm-gray-200); color: var(--rpm-gray-400); cursor: not-allowed; }
+    .feedback-panel { display: none; padding: 20px; background: var(--rpm-gray-50); border-top: 1px solid var(--rpm-gray-200); }
+    .feedback-panel.active { display: block; }
+    .feedback-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .feedback-field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--rpm-gray-600); }
+    .feedback-field select, .feedback-field textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--rpm-gray-200); border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .feedback-field textarea { min-height: 80px; resize: vertical; }
+    .feedback-actions { display: flex; gap: 12px; align-items: center; }
+    .revision-counter { font-size: 13px; color: var(--rpm-gray-400); margin-left: auto; }
+    .simulator-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .simulator-table th, .simulator-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--rpm-gray-200); font-size: 14px; }
+    .simulator-table th { background: var(--rpm-gray-50); font-weight: 600; color: var(--rpm-gray-600); font-size: 12px; text-transform: uppercase; }
+    .simulator-table .highlight { background: #eff6ff; font-weight: 600; }
+    .simulator-cta { margin-top: 20px; text-align: center; }
+    .error-page { text-align: center; padding: 80px 40px; }
+    .error-page h2 { font-size: 24px; margin-bottom: 12px; }
+    .error-page p { color: var(--rpm-gray-600); }
+    .loading { text-align: center; padding: 60px; color: var(--rpm-gray-400); }
+    @media (max-width: 768px) {
+      .portal-container { padding: 16px; }
+      .portal-header, .portal-section { padding: 24px 20px; }
+      .video-card-content { grid-template-columns: 1fr; }
+      .feedback-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="portal-container" id="portal-root">
+
+    <!-- Header -->
+    <div class="portal-header">
+      <p class="meta">RPM Living Digital Products &amp; Services</p>
+      <h1 id="property-name">Loading...</h1>
+      <p class="meta"><span id="package-tier"></span> Package</p>
+      <span class="status-badge status-pending" id="status-badge">Loading</span>
+    </div>
+
+    <!-- Loading State -->
+    <div class="portal-section loading" id="loading-state">
+      <p>Loading your creative review...</p>
+    </div>
+
+    <!-- Error State (hidden by default) -->
+    <div class="portal-section error-page" id="error-state" style="display:none;">
+      <h2>Link expired or invalid</h2>
+      <p>This review link may have expired or is not valid. Please check your email for the latest link, or contact your Account Manager.</p>
+    </div>
+
+    <!-- Content (hidden until loaded) -->
+    <div id="portal-content" style="display:none;">
+
+      <!-- Section 1: Creative Rationale -->
+      <div class="portal-section">
+        <h2>Why This Creative</h2>
+        <p class="rationale-text" id="rationale-text"></p>
+      </div>
+
+      <!-- Section 2: Video Gallery -->
+      <div class="portal-section">
+        <h2>Your Video Creative</h2>
+        <div class="video-grid" id="video-gallery"></div>
+      </div>
+
+      <!-- Section 3: Budget Simulator (Starter/Standard only) -->
+      <div class="portal-section" id="simulator-section" style="display:none;">
+        <h2>What More Investment Could Deliver</h2>
+        <p style="color:var(--rpm-gray-600);font-size:14px;margin-bottom:16px;">
+          Based on your property's actual performance data, here's what upgrading could look like.
+        </p>
+        <table class="simulator-table" id="simulator-table"></table>
+        <div class="simulator-cta">
+          <button class="btn btn-amber" id="upsell-btn">Talk to my AM about upgrading</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION — Set your webhook server URL here
+    // ============================================================
+    window.PORTAL_API_BASE = "{{ module.api_base_url.value || '' }}";
+    // ============================================================
+  </script>
+
+  <!-- Portal JS (inline for HubSpot CMS reliability) -->
+  <script>
+  (function() {
+    "use strict";
+
+    var pathParts = window.location.pathname.split("/");
+    var crIdx = pathParts.indexOf("creative-review");
+    var UUID = crIdx >= 0 ? (pathParts[crIdx + 1] || "") : "";
+    var MONTH = crIdx >= 0 ? (pathParts[crIdx + 2] || "") : "";
+    var TOKEN = new URLSearchParams(window.location.search).get("token") || "";
+    var API_BASE = window.PORTAL_API_BASE || "";
+    var portalData = null;
+
+    function apiPost(endpoint, body) {
+      return fetch(API_BASE + endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign({}, body, { uuid: UUID, month: MONTH, token: TOKEN }))
+      }).then(function(r) { return r.json(); });
+    }
+
+    function apiGet(endpoint) {
+      return fetch(API_BASE + endpoint + "?token=" + encodeURIComponent(TOKEN))
+        .then(function(r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        });
+    }
+
+    function loadPortalData() {
+      if (!UUID || !MONTH || !TOKEN) {
+        showError();
+        return;
+      }
+      apiGet("/api/status/" + UUID + "/" + MONTH)
+        .then(function(data) {
+          portalData = data;
+          document.getElementById("loading-state").style.display = "none";
+          document.getElementById("portal-content").style.display = "block";
+          renderPortal();
+        })
+        .catch(function() {
+          showError();
+        });
+    }
+
+    function showError() {
+      document.getElementById("loading-state").style.display = "none";
+      document.getElementById("error-state").style.display = "block";
+    }
+
+    function renderPortal() {
+      if (!portalData) return;
+
+      var statusMap = { "Pending": "status-pending", "Approved": "status-approved", "Partial Approval": "status-partial", "Revision Requested": "status-revision" };
+      document.getElementById("property-name").textContent = portalData.property_name;
+      document.getElementById("package-tier").textContent = portalData.package_tier;
+      var badge = document.getElementById("status-badge");
+      badge.textContent = portalData.approval_status;
+      badge.className = "status-badge " + (statusMap[portalData.approval_status] || "status-pending");
+      document.getElementById("rationale-text").textContent = portalData.rationale;
+
+      renderVideoGallery();
+
+      if (portalData.package_tier !== "Premium" && portalData.performance_snapshot && portalData.performance_snapshot.aggregate_cpl) {
+        renderBudgetSimulator();
+        document.getElementById("simulator-section").style.display = "block";
+      }
+    }
+
+    function renderVideoGallery() {
+      var container = document.getElementById("video-gallery");
+      container.innerHTML = "";
+      var scripts = portalData.scripts || [];
+      var urls = portalData.video_urls || [];
+
+      scripts.forEach(function(script) {
+        var videoData = urls.find(function(v) { return v.script_id === script.script_id; }) || {};
+        container.appendChild(createVideoCard(script, videoData));
+      });
+
+      if (scripts.length > 0 && portalData.approval_status !== "Approved") {
+        var div = document.createElement("div");
+        div.style.marginTop = "16px";
+        var btn = document.createElement("button");
+        btn.className = "btn btn-approve-all";
+        btn.textContent = "Approve All Variants";
+        btn.onclick = function() { approveAll(); };
+        div.appendChild(btn);
+        container.appendChild(div);
+      }
+    }
+
+    function createVideoCard(script, videoData) {
+      var card = document.createElement("div");
+      card.className = "video-card";
+      card.id = "card-" + script.script_id;
+
+      var atLimit = portalData.revision_count >= portalData.max_revisions;
+      var sid = script.script_id;
+
+      card.innerHTML = '<div class="video-meta-badge"><span>' + script.video_length + 's</span><span>' + script.aspect_ratio + '</span><span>' + script.target_platform + '</span></div>' +
+        '<div class="video-card-content"><div class="video-player">' +
+        (videoData.url ? '<video controls preload="metadata"><source src="' + videoData.url + '" type="video/mp4"></video>' : '<p style="color:#666">Video processing...</p>') +
+        '</div><div class="script-panel">' +
+        '<div class="script-section"><label>Hook</label><p>' + script.hook + '</p></div>' +
+        '<div class="script-section"><label>Body</label><p>' + script.body + '</p></div>' +
+        '<div class="script-section"><label>Call to Action</label><p>' + script.cta + '</p></div>' +
+        '</div></div>' +
+        '<div class="video-actions"><button class="btn btn-approve" data-action="approve" data-sid="' + sid + '">Approve</button>' +
+        '<button class="btn btn-edit" data-action="edit" data-sid="' + sid + '">Request Edits</button></div>' +
+        '<div class="feedback-panel" id="feedback-' + sid + '">' +
+        '<div class="feedback-grid">' +
+        '<div class="feedback-field"><label>Tone Shift</label><select id="tone-' + sid + '"><option value="">Keep current</option><option value="more formal-luxury">More formal / luxury</option><option value="more casual-friendly">More casual / friendly</option><option value="more urgent-scarcity">More urgent / scarcity</option><option value="more aspirational-lifestyle">More aspirational / lifestyle</option></select></div>' +
+        '<div class="feedback-field"><label>Emphasis Shift</label><select id="emphasis-' + sid + '"><option value="">Keep current</option><option value="focus on amenities">Focus on amenities</option><option value="focus on location">Focus on location</option><option value="focus on pricing-value">Focus on pricing / value</option><option value="focus on lifestyle">Focus on lifestyle</option><option value="focus on community">Focus on community</option></select></div>' +
+        '<div class="feedback-field"><label>Photo Emphasis</label><select id="photo-' + sid + '"><option value="">Keep current</option><option value="pool-outdoor">Pool / outdoor spaces</option><option value="kitchen-interiors">Kitchen / interiors</option><option value="fitness center">Fitness center</option><option value="building exterior">Building exterior</option><option value="neighborhood">Neighborhood</option></select></div>' +
+        '<div class="feedback-field"><label>Call to Action</label><select id="cta-' + sid + '"><option value="">Keep current</option><option value="schedule a tour">Schedule a tour</option><option value="apply now">Apply now</option><option value="learn more">Learn more</option><option value="call us today">Call us today</option><option value="see available units">See available units</option></select></div>' +
+        '</div>' +
+        '<div class="feedback-field" style="margin-bottom:16px"><label>Additional Notes</label><textarea id="notes-' + sid + '" placeholder="e.g., Our residents skew younger — make it feel more energetic"></textarea></div>' +
+        '<div class="feedback-actions"><button class="btn ' + (atLimit ? 'btn-disabled' : 'btn-primary') + '" data-action="' + (atLimit ? 'contact-am' : 'submit-revision') + '" data-sid="' + sid + '">' + (atLimit ? 'Contact your AM' : 'Submit Feedback') + '</button>' +
+        '<span class="revision-counter">Revision ' + portalData.revision_count + ' of ' + portalData.max_revisions + ' used this month</span></div></div>';
+
+      return card;
+    }
+
+    // Event delegation for buttons
+    document.addEventListener("click", function(e) {
+      var btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      var action = btn.getAttribute("data-action");
+      var sid = btn.getAttribute("data-sid");
+
+      if (action === "approve") approveVariant(sid);
+      else if (action === "edit") toggleFeedback(sid);
+      else if (action === "submit-revision") submitRevision(sid);
+      else if (action === "contact-am") window.location.href = "mailto:?subject=Additional%20Revisions%20Request";
+    });
+
+    function toggleFeedback(sid) {
+      var panel = document.getElementById("feedback-" + sid);
+      if (panel) panel.classList.toggle("active");
+    }
+
+    function approveVariant(sid) {
+      apiPost("/api/approve", { variant_ids: [sid] }).then(function(result) {
+        showToast(result.message || "Variant approved");
+        loadPortalData();
+      });
+    }
+
+    function approveAll() {
+      apiPost("/api/approve", { variant_ids: "all" }).then(function(result) {
+        showToast(result.message || "All variants approved");
+        loadPortalData();
+      });
+    }
+
+    function submitRevision(sid) {
+      var body = {
+        variant_script_id: sid,
+        tone_shift: document.getElementById("tone-" + sid).value || null,
+        emphasis_shift: document.getElementById("emphasis-" + sid).value || null,
+        photo_emphasis: document.getElementById("photo-" + sid).value || null,
+        cta_change: document.getElementById("cta-" + sid).value || null,
+        free_text_notes: document.getElementById("notes-" + sid).value || ""
+      };
+      showToast("Submitting feedback — your revised creative will be ready in a few minutes...");
+      apiPost("/api/revision", body).then(function(result) {
+        if (result.error) showToast(result.message || result.error, true);
+        else { showToast("Revision complete! Refreshing..."); setTimeout(loadPortalData, 1500); }
+      });
+    }
+
+    function renderBudgetSimulator() {
+      var snap = portalData.performance_snapshot;
+      var tiers = { Starter: 2, Standard: 4, Premium: 6 };
+      var currentTier = portalData.package_tier;
+      var currentVariants = tiers[currentTier] || 2;
+      var nextTier = currentTier === "Starter" ? "Standard" : "Premium";
+      var nextVariants = tiers[nextTier] || 4;
+      var currentReach = snap.total_impressions || 0;
+      var currentLeads = snap.total_leads || 0;
+      var convRate = currentReach > 0 ? currentLeads / currentReach : 0;
+      var cpl = snap.aggregate_cpl || 0;
+      var nextReach = Math.round(currentReach * (nextVariants / currentVariants));
+      var nextLeads = Math.round(nextReach * convRate);
+      var boostReach = nextReach * 2;
+      var boostLeads = Math.round(boostReach * convRate);
+
+      document.getElementById("simulator-table").innerHTML =
+        '<thead><tr><th>Metric</th><th>Current (' + currentTier + ')</th><th class="highlight">' + nextTier + '</th><th>' + nextTier + ' + 2x Budget</th></tr></thead>' +
+        '<tbody><tr><td>Variants</td><td>' + currentVariants + '</td><td class="highlight">' + nextVariants + '</td><td>' + nextVariants + '</td></tr>' +
+        '<tr><td>Projected Reach</td><td>' + currentReach.toLocaleString() + '</td><td class="highlight">' + nextReach.toLocaleString() + '</td><td>' + boostReach.toLocaleString() + '</td></tr>' +
+        '<tr><td>Projected Leads</td><td>' + currentLeads.toLocaleString() + '</td><td class="highlight">' + nextLeads.toLocaleString() + '</td><td>' + boostLeads.toLocaleString() + '</td></tr>' +
+        '<tr><td>Est. CPL</td><td>$' + cpl.toFixed(2) + '</td><td class="highlight">$' + cpl.toFixed(2) + '</td><td>$' + cpl.toFixed(2) + '</td></tr></tbody>';
+
+      document.getElementById("upsell-btn").onclick = function() {
+        apiPost("/api/upsell", { interested_tier: nextTier }).then(function(result) {
+          showToast(result.message || "Interest submitted");
+        });
+      };
+    }
+
+    function showToast(msg, isError) {
+      var toast = document.createElement("div");
+      toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:" + (isError ? "#dc2626" : "#1a1a2e") + ";color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 4000);
+    }
+
+    document.addEventListener("DOMContentLoaded", loadPortalData);
+  })();
+  </script>
+
+  {{ standard_footer_includes }}
+</body>
+</html>

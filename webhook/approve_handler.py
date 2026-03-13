@@ -31,7 +31,7 @@ def handle_approve(property_data: dict, variant_ids: list | str) -> dict:
         update_approval_status(
             hs_object_id,
             "Approved",
-            video_creative_approved_date=datetime.now().isoformat(),
+            video_creative_approved_date=datetime.now().strftime("%Y-%m-%d"),
         )
 
         log_audit(property_name, "approval", "Approved", "All variants approved")
@@ -53,7 +53,7 @@ def handle_approve(property_data: dict, variant_ids: list | str) -> dict:
         update_approval_status(
             hs_object_id,
             "Approved",
-            video_creative_approved_date=datetime.now().isoformat(),
+            video_creative_approved_date=datetime.now().strftime("%Y-%m-%d"),
         )
         send_approved_notification(property_data, video_urls)
     else:
