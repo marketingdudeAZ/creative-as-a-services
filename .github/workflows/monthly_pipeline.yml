@@ -1,0 +1,76 @@
+name: Monthly Video Pipeline
+
+on:
+  schedule:
+    # 1st of every month at 6:00 AM CT (11:00 UTC during CDT, 12:00 UTC during CST)
+    - cron: "0 12 1 * *"
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: "Run in test mode (single property)"
+        required: false
+        default: "false"
+        type: boolean
+      property_sfid:
+        description: "Run for a specific property SFID (optional)"
+        required: false
+        type: string
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          HUBSPOT_API_KEY: ${{ secrets.HUBSPOT_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          APTIQ_API_KEY: ${{ secrets.APTIQ_API_KEY }}
+          APTIQ_ACCOUNT: ${{ secrets.APTIQ_ACCOUNT }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_IMAP_HOST: imap.gmail.com
+          CREATIFY_API_ID: ${{ secrets.CREATIFY_API_ID }}
+          CREATIFY_API_KEY: ${{ secrets.CREATIFY_API_KEY }}
+          HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
+          GOOGLE_SHEETS_AUDIT_ID: ${{ secrets.GOOGLE_SHEETS_AUDIT_ID }}
+          GOOGLE_SHEETS_ERROR_ID: ${{ secrets.GOOGLE_SHEETS_ERROR_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          PORTAL_BASE_URL: ${{ secrets.PORTAL_BASE_URL }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: "587"
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          if [ "${{ inputs.property_sfid }}" != "" ]; then
+            echo "Running for property: ${{ inputs.property_sfid }}"
+            python main.py --property "${{ inputs.property_sfid }}"
+          elif [ "${{ inputs.test_mode }}" == "true" ]; then
+            echo "Running in test mode"
+            python main.py --test
+          else
+            echo "Running full monthly pipeline"
+            python main.py
+          fi
+
+      - name: Upload run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-run-${{ github.run_id }}
+          path: "*.log"
+          retention-days: 30

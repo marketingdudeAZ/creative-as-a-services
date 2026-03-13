@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: rpm-video-webhook
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn webhook.server:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: HUBSPOT_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: PORTAL_BASE_URL
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.11.6"
